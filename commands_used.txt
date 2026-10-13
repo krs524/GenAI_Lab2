@@ -1,19 +1,19 @@
-GenAI Lab 2 — Commands Used
-==========================
-This log records the main confirmed commands and configurations used
-during the ReVA lab. It is not a complete terminal-history export.
-Commands are documented for reproducibility; do not blindly rerun them.
+Qwen3-VL Fine-Tuning and ReVA Evaluation Lab - Commands Used
+------------------------------------------------------------
+This file records the main commands, settings, and results from my Qwen3-VL
+fine-tuning and ReVA evaluation experiments. It is not a complete terminal
+history or a standalone setup script. Paths refer to my local WSL setup.
 
 1. Testing
 ----------
 ~/vlm-pc-env/bin/python -m pytest -q tests/test_student_todos.py
 
-Result: 7 tests passed; 18 assignment TODOs completed.
+Result: All tests passed; required TODOs completed.
 
 
 2. Qwen Environment
 -------------------
-Environment: qwen2
+Conda environment: qwen2
 Python: 3.10
 PyTorch: 2.6.0+cu124
 Transformers: 4.57.6
@@ -23,22 +23,23 @@ FlashAttention: 2.7.4.post1
 FlashAttention installation:
 "$HOME/miniforge3/envs/qwen2/bin/python" -m pip install --no-deps "https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.6cxx11abiFALSE-cp310-cp310-linux_x86_64.whl"
 
-Training program startup test:
+Training script help check:
 "$HOME/miniforge3/envs/qwen2/bin/python" qwen_finetune/qwenvl/train/train_qwen.py --help
 
 
 3. Training Data
 ----------------
-Instructor-provided ReVA annotations and videos were prepared locally.
+I used the ReVA annotations from the provided assignment repository and kept
+the video files locally.
 
 Training samples: 200
-Official evaluation questions: 4000
+ReVA test questions: 4000
 
-Training data was generated with:
+Qwen training data preparation:
 MAX_SAMPLES=200 REQUIRE_VIDEO=1 bash scripts/prepare_qwen_train_data.sh
 
 
-4. Original Qwen Evaluation
+4. Qwen Baseline Evaluation
 ---------------------------
 PATH="$HOME/miniforge3/bin:$PATH" \
 CONDA_ENV=qwen2 \
@@ -51,6 +52,7 @@ MAX_PIXELS=50176 \
 bash scripts/run_eval_qwen_base.sh
 
 Result: 2574/4000 = 64.35%
+Saved summary: outputs/qwen_base/qwen_base/result.csv
 
 
 5. Qwen LoRA Fine-Tuning
@@ -71,7 +73,7 @@ USE_DEEPSPEED=0 \
 bash scripts/run_finetune_qwen.sh
 
 Result: 200/200 training steps completed.
-LoRA adapter: outputs/qwen_reva_sft/
+Local LoRA output: outputs/qwen_reva_sft/
 
 
 6. Fine-Tuned Qwen Evaluation
@@ -88,6 +90,7 @@ MAX_PIXELS=50176 \
 bash scripts/run_eval_qwen_finetuned.sh
 
 Result: 2575/4000 = 64.38%
+Saved summary: outputs/qwen_sft/qwen_sft/result.csv
 
 
 7. VILA Setup
@@ -106,7 +109,7 @@ git clone --depth 1 https://github.com/NVlabs/VILA.git "$HOME/VILA"
 
 "$HOME/miniforge3/bin/conda" install -n vila -c nvidia cuda-nvcc=12.1 -y
 
-Additional VILA dependencies installed during troubleshooting:
+Other packages installed while setting up VILA:
 deepspeed==0.14.5
 pydantic<2
 loguru
@@ -128,18 +131,18 @@ triton==3.1.0
 sentencepiece==0.1.99
 protobuf==3.20.3
 
-VILA loader verification:
+VILA loader import check:
 CUDA_HOME="$HOME/miniforge3/envs/vila" \
 "$HOME/miniforge3/envs/vila/bin/python" -c \
 "from llava.model.builder import load_pretrained_model; print('VILA model loader: OK')"
 
-VILA video compatibility fix in the separate upstream clone:
+Video FPS fix in my separate VILA clone:
 sed -i 's/fps = getattr(config, "fps", 0.0)/fps = getattr(config, "fps", 0.0) or 0.0/' "$HOME/VILA/llava/utils/media.py"
 
 
 8. VILA Smoke Test
 ------------------
-Environment variables used:
+Settings used with bash scripts/run_eval_reva_vila.sh:
 PATH="$HOME/miniforge3/bin:$PATH"
 CUDA_HOME="$HOME/miniforge3/envs/vila"
 CONDA_ENV=vila
@@ -150,9 +153,7 @@ REVA_JSON="$PWD/data/reva_test/test_set.json"
 MAX_QUESTIONS=2
 NUM_VIDEO_FRAMES=4
 
-Script: bash scripts/run_eval_reva_vila.sh
-
-Result: 2/2 questions answered correctly.
+Result: 2/2 questions correct (smoke test only).
 
 
 9. Full VILA Evaluation
@@ -169,6 +170,7 @@ NUM_VIDEO_FRAMES=4 \
 bash scripts/run_eval_reva_vila.sh
 
 Result: 1948/4000 = 48.70%
+Saved metrics: outputs/vila_reva_v2_full/metrics.json
 
 
 10. Model Comparison
@@ -179,12 +181,12 @@ python3 scripts/compare_model_metrics.py \
 Output: outputs/model_comparison.csv
 
 
-11. Important Notes
--------------------
+11. Notes
+---------
 - GPU: NVIDIA GeForce RTX 3060, 12 GB VRAM.
-- System: Ubuntu 22.04 under Windows WSL2.
-- The full ReVA videos and instructor-provided annotations are not
-  included in the personal public repository.
-- Windows CRLF line endings were corrected in several shell scripts.
-- Qwen and VILA were installed in separate Conda environments.
-- The original instructor repository was not committed or pushed.
+- System: Ubuntu 22.04 on Windows WSL2.
+- Full ReVA annotations, videos, and model weights were kept locally and
+  are not included in this GitHub repository.
+- Converted Windows line endings (CRLF) to Unix line endings (LF) for WSL
+  compatibility.
+- Qwen and VILA used separate Conda environments (qwen2 and vila).
