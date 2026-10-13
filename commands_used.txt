@@ -1,5 +1,5 @@
-Qwen3-VL Fine-Tuning and ReVA Evaluation Lab - Commands Used
-------------------------------------------------------------
+Qwen3-VL Fine-Tuning and ReVA Evaluation Lab - Commands 
+-------------
 This file records the main commands, settings, and results from my Qwen3-VL
 fine-tuning and ReVA evaluation experiments. It is not a complete terminal
 history or a standalone setup script. Paths refer to my local WSL setup.
